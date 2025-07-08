@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+    }
+    .vhs-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .vhs-effect {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.02),
+        rgba(255, 255, 255, 0.02) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      animation: flicker 0.15s infinite;
+      pointer-events: none;
+      z-index: 2;
+      mix-blend-mode: overlay;
+    }
+    @keyframes flicker {
+      0%, 100% { opacity: 0.05; }
+      50% { opacity: 0.1; }
+    }
+    .container {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 900px;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .inventory-title {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 60px;
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+    .arrow {
+      cursor: pointer;
+      user-select: none;
+      font-size: 40px;
+      transition: transform 0.2s, color 0.2s;
+      animation: arrow-blink 1s infinite;
+    }
+    @keyframes arrow-blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.2; transform: scale(1.15); }
+    }
+    .item-image {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      margin: 40px auto 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .item-image img {
+      position: relative;
+      z-index: 2;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      image-rendering: pixelated;
+      border: none;
+      opacity: 0;
+    }
+    .item-image img.fade-in {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .item-image img.fade-out {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    .background-items {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      opacity: 0.1;
+      filter: blur(2px) grayscale(100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .bg-item {
+      width: 30%;
+      max-height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      transform: scale(0.8) rotateZ(-8deg);
+      opacity: 0.6;
+    }
+    .item-details {
+      margin-top: 40px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .footer {
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 1px;
+      z-index: 10;
+    }
+    .vhs-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 100;
+      opacity: 0.25;
+      mix-blend-mode: lighten;
+      pointer-events: none;
+    }
+
+    .mobile-footer {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .desktop-footer {
+    display: none;
+  }
+  .mobile-footer {
+    display: inline;
+    line-height: 1.6;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="vhs-wrapper">
+    <div class="vhs-effect"></div>
+
+    <div class="container">
+      <div class="inventory-title">
+        <span class="arrow left-arrow">&#x25C0;</span>
+        INVENTARIO
+        <span class="arrow right-arrow">&#x25B6;</span>
+      </div>
+
+      <div class="item-image">
+        <div class="background-items"></div>
+        <img src="" alt="Item Image" />
+      </div>
+
+      <div class="item-details">
+        <div class="item-name"></div>
+        <div class="item-desc" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="desktop-footer">EQUIPAR: BARRA ESPACIADORA O PULSA EL ITEM</span>
+    <span class="mobile-footer">EQUIPAR: BARRA ESPACIADORA<br>O PULSA EL ITEM</span>
+  </div>
+  
+
+  <!-- 🎵 Sonidos -->
+  <audio id="sound-switch" src="00.mp3" preload="auto"></audio>
+  <audio id="sound-select" src="01.mp3" preload="auto"></audio>
+
+  <script>
+    const items = [
+      { name: "Medidor de sonido", desc: "La radio emite ondas de sonido al aire, mientras que el medidor de sonido las capta y analiza.", img: "RadioTrinketDownpour.gif" },
+      { name: "Munición", desc: "Las cámaras vigilan para prevenir intrusos; la munición responde a amenazas en contextos militares o policiales.", img: "AmmoHand.gif" },
+      { name: "Depósito de gasolina", desc: "Aunque pasen los años, lo clásico sigue en movimiento, ya sea en la carretera o en la pantalla.", img: "GasolineInv.gif" },
+      { name: "Líquido desconocido", desc: "Lo que consumimos afecta a nuestra mente, alterando pensamientos, emociones y percepciones profundas.", img: "Bottle.webp" }
+    ];
+
+    let currentIndex = 0;
+    const itemName = document.querySelector(".item-name");
+    const itemDesc = document.querySelector(".item-desc");
+    const itemImg = document.querySelector(".item-image img");
+    const bgContainer = document.querySelector(".background-items");
+
+    const soundSwitch = document.getElementById("sound-switch");
+    const soundSelect = document.getElementById("sound-select");
+
+    function showItem(index) {
+  itemImg.classList.remove("fade-in");
+  itemImg.classList.add("fade-out");
+
+  setTimeout(() => {
+    const current = items[index];
+    itemImg.src = current.img;
+    itemName.textContent = current.name;
+
+    // Detectar si es móvil y el texto es el específico
+    const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
+if (isMobile) {
+  if (current.desc === "Lo que consumimos afecta a nuestra mente, alterando pensamientos, emociones y percepciones profundas.") {
+    itemDesc.innerHTML = "Lo que consumimos afecta a nuestra mente, alterando pensamientos, emociones y percepciones profundas.";
+  } else if (current.desc === "Aunque pasen los años, lo clásico sigue en movimiento, ya sea en la carretera o en la pantalla.") {
+    itemDesc.innerHTML = "Aunque pasen los años,<br>lo clásico sigue en movimiento,<br>ya sea en la carretera<br>o en la pantalla.";
+  } else {
+    itemDesc.textContent = current.desc;
+  }
+} else {
+  itemDesc.textContent = current.desc;
+}
+
+    itemImg.classList.remove("fade-out");
+    itemImg.classList.add("fade-in");
+
+    bgContainer.innerHTML = items
+      .filter((_, i) => i !== index)
+      .map(item => `<img class="bg-item" src="${item.img}" alt="">`)
+      .join("");
+  }, 200);
+}
+
+
+    function prevItem() {
+      currentIndex = (currentIndex - 1 + items.length) % items.length;
+      showItem(currentIndex);
+      soundSwitch.currentTime = 0;
+      soundSwitch.play();
+    }
+
+    function nextItem() {
+      currentIndex = (currentIndex + 1) % items.length;
+      showItem(currentIndex);
+      soundSwitch.currentTime = 0;
+      soundSwitch.play();
+    }
+
+    document.querySelector(".left-arrow").addEventListener("click", prevItem);
+    document.querySelector(".right-arrow").addEventListener("click", nextItem);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") prevItem();
+      if (e.key === "ArrowRight") nextItem();
+
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        soundSelect.currentTime = 0;
+        soundSelect.play();
+
+        const current = items[currentIndex];
+        if (current.img === "AmmoHand.gif") {
+          window.open("http://80.32.125.254:8080/cgi-bin/guestimage.html", "_blank");
+        } else if (current.img === "RadioTrinketDownpour.gif") {
+          window.open("https://radio.garden/visit/nesquehoning-pa/nFbLrVAj", "_blank");
+        } else if (current.img === "Bottle.webp") {
+          window.open("https://90s.myretrotvs.com/#LIqRQc8QGfs", "_blank");
+        } else if (current.img === "GasolineInv.gif") {
+          window.open("https://emupedia.net/beta/emuos/", "_blank");
+        }
+      }
+    });
+
+    itemImg.addEventListener("click", () => {
+      soundSelect.currentTime = 0;
+      soundSelect.play();
+
+      const current = items[currentIndex];
+      if (current.img === "AmmoHand.gif") {
+        window.open("http://80.32.125.254:8080/cgi-bin/guestimage.html", "_blank");
+      } else if (current.img === "RadioTrinketDownpour.gif") {
+        window.open("https://radio.garden/visit/nesquehoning-pa/nFbLrVAj", "_blank");
+      } else if (current.img === "Bottle.webp") {
+        window.open("https://90s.myretrotvs.com/#LIqRQc8QGfs", "_blank");
+      } else if (current.img === "GasolineInv.gif") {
+        window.open("https://emupedia.net/beta/emuos/", "_blank");
+      }
+    });
+
+    showItem(currentIndex);
+  </script>
+
+  <img src="1964b33ae194dafc515adad96ee5aa989a38eb4.gif" class="vhs-overlay" />
+</body>
+</html>
