@@ -52,9 +52,8 @@
     }
     .inventory-title {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      gap: 60px;
       font-size: 20px;
       letter-spacing: 2px;
     }
@@ -134,6 +133,7 @@
       font-size: 12px;
       letter-spacing: 1px;
       z-index: 10;
+      background: #000;
     }
     .vhs-overlay {
       position: fixed;
@@ -187,7 +187,7 @@
     font-size: 11px;
     line-height: 1.4;
     margin-top: 20px;
-    padding-bottom: 40px; /* separa del footer */
+    padding-bottom: 80px; /* más espacio para evitar superposición */
   }
 
   .item-name {
@@ -220,7 +220,7 @@
     <div class="container">
       <div class="inventory-title">
         <span class="arrow left-arrow">&#x25C0;</span>
-        INVENTARIO
+        <span class="inventory-text">INVENTARIO</span>
         <span class="arrow right-arrow">&#x25B6;</span>
       </div>
 
